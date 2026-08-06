@@ -1,23 +1,22 @@
 import os
-from flask import Flask
-from threading import Thread
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
-app = Flask('')
+# Simple HTTP Handler Render Port check ke liye
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is active!")
 
-@app.route('/')
-def home():
-    return "Bot is Alive!"
-
-def run():
+def run_server():
     port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+    server.serve_forever()
 
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
+# Separate background thread mein HTTP server start karo
+threading.Thread(target=run_server, daemon=True).start()
 
-# Server start karein
-keep_alive()
 import logging
 import sqlite3
 import datetime
